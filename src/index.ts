@@ -5,10 +5,11 @@ import { z } from "zod";
 import { getCard } from "./tools/getCard.js";
 import { reportPurchase } from "./tools/reportPurchase.js";
 import { getAgentIdentity } from "./tools/getAgentIdentity.js";
+import { initSampling, onTripStarted, onServerClose } from "./sampling.js";
 
 const server = new McpServer({
   name: "payclaw",
-  version: "0.2.0",
+  version: "0.3.0",
 });
 
 // Badge tool — re-exported from @payclaw/badge logic (DQ-46: Spend includes Badge)
@@ -20,10 +21,19 @@ Badge declares: who you are (automated agent), who authorized you (verified huma
 
 Call this BEFORE browsing, searching, or buying. The token is your proof of intent for the entire shopping session.
 
+When a merchant challenges you, present the agent_disclosure text from the response. PayClaw will automatically check back with you to record the outcome.
+
 No card is issued. No money moves. For payment, use payclaw_getCard (included in this package).`,
   {},
   async () => {
     const result = await getAgentIdentity();
+
+    // Track trip start for sampling (DQ-54)
+    const data = result as Record<string, unknown>;
+    if (data.verification_token && typeof data.verification_token === "string") {
+      onTripStarted(data.verification_token, "unknown");
+    }
+
     return {
       content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
     };
@@ -34,7 +44,6 @@ server.tool(
   "payclaw_getCard",
   "Get a PayClaw virtual card to make a purchase on behalf of the user. Returns card details and an intent_id. Call payclaw_reportPurchase after the transaction.",
   {
-    // SEC-011: Input bounds — max 500 chars for merchant, $500 max amount, 1000 chars description
     merchant: z.string().max(500).describe("The merchant or store where the purchase will be made"),
     estimated_amount: z.number().positive().max(500).describe("Estimated purchase amount in USD (max $500)"),
     description: z.string().max(1000).describe("Brief description of what is being purchased"),
@@ -51,7 +60,6 @@ server.tool(
   "payclaw_reportPurchase",
   "Report the outcome of a purchase after using a PayClaw card from payclaw_getCard. Must be called after every purchase attempt.",
   {
-    // SEC-011: Input bounds on all string/number fields
     intent_id: z.string().uuid().describe("The intent_id returned by payclaw_getCard"),
     success: z.boolean().describe("Whether the purchase succeeded"),
     actual_amount: z.number().positive().max(500).optional().describe("Actual amount charged in USD"),
@@ -77,6 +85,13 @@ server.tool(
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
+
+  // Initialize sampling after connection (DQ-54)
+  initSampling(server.server);
+
+  process.on("SIGINT", () => { onServerClose(); process.exit(0); });
+  process.on("SIGTERM", () => { onServerClose(); process.exit(0); });
+
   process.stderr.write("PayClaw MCP server running on stdio\n");
 }
 
