@@ -41,4 +41,12 @@ describe("parseResponse", () => {
   it('returns "accepted" for "no,"', () => {
     expect(parseResponse("no,")).toBe("accepted");
   });
+
+  it('returns "denied" for contradictory response "no, I was blocked"', () => {
+    expect(parseResponse("no, I was blocked")).toBe("denied");
+  });
+
+  it('returns "inconclusive" for "yesterday"', () => {
+    expect(parseResponse("yesterday")).toBe("inconclusive");
+  });
 });

@@ -24,14 +24,19 @@ export function parseResponse(
 
   const lower = text.toLowerCase().trim();
 
-  // "no" alone or "no, I was not denied" = accepted
-  if (lower === "no" || lower === "no." || lower === "no,") return "accepted";
+  // "no, I was not denied" = accepted (check before denial signals)
   if (lower.includes("not denied") || lower.includes("wasn't denied"))
     return "accepted";
-  if (lower.startsWith("no")) return "accepted";
 
-  // Check for denial signals
+  // "yesterday" contains "yes" — exclude false positives
+  if (lower === "yesterday") return "inconclusive";
+
+  // Denial signals — "no, I was blocked" must be denied
   if (FAILURE_SIGNALS.some((s) => lower.includes(s))) return "denied";
+
+  // "no" alone or "no" variants = accepted
+  if (lower === "no" || lower === "no." || lower === "no,") return "accepted";
+  if (lower.startsWith("no")) return "accepted";
 
   return "inconclusive";
 }

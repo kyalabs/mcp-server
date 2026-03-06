@@ -17,7 +17,7 @@ export async function reportBadgePresented(
   if (!key) return;
 
   try {
-    await fetch(`${apiUrl}/api/badge/report`, {
+    const res = await fetch(`${apiUrl}/api/badge/report`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${key}`,
@@ -29,6 +29,12 @@ export async function reportBadgePresented(
         merchant,
       }),
     });
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      process.stderr.write(
+        `[BADGE] reportBadgePresented failed (${res.status}): ${body}\n`
+      );
+    }
   } catch {
     /* fire-and-forget */
   }

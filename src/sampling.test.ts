@@ -16,13 +16,25 @@ import {
 } from "./sampling.js";
 
 describe("sampling", () => {
+  let originalVitest: string | undefined;
+  const mockFetch = vi.fn();
+
   beforeEach(() => {
+    originalVitest = process.env.VITEST;
     process.env.VITEST = "true";
+    vi.stubGlobal("fetch", mockFetch);
+    mockFetch.mockResolvedValue({ ok: true });
     resetSamplingState();
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.unstubAllGlobals();
+    if (originalVitest !== undefined) {
+      process.env.VITEST = originalVitest;
+    } else {
+      delete process.env.VITEST;
+    }
     resetSamplingState();
   });
 

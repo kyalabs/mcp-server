@@ -69,12 +69,12 @@ describe("reportBadgePresented", () => {
 
   it("uses PAYCLAW_API_URL when set", async () => {
     vi.mocked(storage.getStoredConsentKey).mockReturnValue("pk_test_xxx");
-    process.env.PAYCLAW_API_URL = "https://api.payclaw.io";
+    process.env.PAYCLAW_API_URL = "https://custom-payclaw.example";
 
     await reportBadgePresented("tok", "m");
 
     expect(mockFetch).toHaveBeenCalledWith(
-      "https://api.payclaw.io/api/badge/report",
+      "https://custom-payclaw.example/api/badge/report",
       expect.any(Object)
     );
   });

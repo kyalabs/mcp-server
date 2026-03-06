@@ -242,6 +242,7 @@ export function resetSamplingState(): void {
   activeTrips.clear();
   serverRef = null;
   samplingAvailable = true;
+  reaperStarted = false;
 }
 
 /** Test-only: get trip for assertions. Returns undefined when VITEST not set. */
