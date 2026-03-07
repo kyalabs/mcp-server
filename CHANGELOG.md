@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.8.1] - 2026-03-07 — Spend availability fix + hold expiry
+
+### Fixed
+- **spend_available: false on funded wallets** — `callWithOAuthToken` silently caught API errors and fell back to hardcoded `spend_available: false`, killing agent trips before `getCard` was ever called. Fallback now returns `spend_available: undefined` with a CTA to try `getCard` directly.
+- **Zombie holds blocking available balance** — expired `balance_holds` were never released after their 2h TTL. Added `release_expired_holds()` DB function, called before every balance read and intent creation.
+
+### Added
+- **MCP stderr logging** — API requests log method + path + status to stderr. Tool calls (`getCard`, `getAgentIdentity`) log params and results. OAuth fallback errors are now visible instead of silently swallowed.
+
 ## [0.8.0] - 2026-03-07 — PRD-3: UCP-Aware Identity
 
 ### Added

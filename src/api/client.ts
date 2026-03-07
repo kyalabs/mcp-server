@@ -18,6 +18,11 @@ class PayClawApiError extends Error {
   }
 }
 
+/** MCP-safe logging — writes to stderr so it doesn't interfere with stdio protocol. */
+function log(level: "info" | "warn" | "error", msg: string): void {
+  process.stderr.write(`[PayClaw:${level}] ${msg}\n`);
+}
+
 /** SEC-010: Default timeout for all API requests (30 seconds) */
 const REQUEST_TIMEOUT_MS = 30_000;
 
@@ -45,6 +50,11 @@ function authHeaders(apiKey: string): Record<string, string> {
 }
 
 async function request<T>(url: string, init: RequestInit): Promise<T> {
+  const method = init.method || "GET";
+  // SEC-013: Log path only (no query params that might contain tokens)
+  const urlPath = new URL(url).pathname;
+  log("info", `${method} ${urlPath}`);
+
   // SEC-010: Add timeout to prevent indefinite hangs
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -55,8 +65,10 @@ async function request<T>(url: string, init: RequestInit): Promise<T> {
   } catch (err) {
     clearTimeout(timeout);
     if (err instanceof Error && err.name === "AbortError") {
+      log("error", `${method} ${urlPath} → timeout`);
       throw new PayClawApiError("Request timed out. Please try again.");
     }
+    log("error", `${method} ${urlPath} → network error`);
     // SEC-013: Generic error message — don't leak URL or config details
     throw new PayClawApiError("Could not reach the PayClaw API. Please check your configuration.");
   } finally {
@@ -64,6 +76,7 @@ async function request<T>(url: string, init: RequestInit): Promise<T> {
   }
 
   if (res.status === 401) {
+    log("error", `${method} ${urlPath} → 401 unauthorized`);
     throw new PayClawApiError(
       "Authentication failed. Please check your API key.",
       401,
@@ -78,9 +91,11 @@ async function request<T>(url: string, init: RequestInit): Promise<T> {
     } catch {
       body = await res.text();
     }
+    log("error", `${method} ${urlPath} → ${res.status}: ${body.slice(0, 200)}`);
     throw new PayClawApiError(body, res.status);
   }
 
+  log("info", `${method} ${urlPath} → ${res.status}`);
   return (await res.json()) as T;
 }
 

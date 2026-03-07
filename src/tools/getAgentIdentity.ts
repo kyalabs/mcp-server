@@ -195,9 +195,14 @@ async function callWithOAuthToken(token: string, merchant?: string): Promise<Ide
       merchant: merchant || undefined,
       ...result,
     };
-  } catch {
-    // API may not accept OAuth tokens yet — build identity locally
-    return identityFromOAuthToken(token, undefined, merchant, false);
+  } catch (err) {
+    process.stderr.write(`[PayClaw] OAuth identity API failed: ${err instanceof Error ? err.message : String(err)}\n`);
+    // Fallback to local identity — but do NOT hardcode spend_available: false
+    // since we can't determine spend status without the API
+    const fallback = identityFromOAuthToken(token, undefined, merchant, false);
+    fallback.spend_available = undefined;
+    fallback.spend_cta = "Could not verify spend status. Try payclaw_getCard directly — it will check your balance.";
+    return fallback;
   }
 }
 

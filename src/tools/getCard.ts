@@ -210,7 +210,10 @@ function getCardViaMock(input: GetCardInput): CardResult {
 }
 
 export async function getCard(input: GetCardInput): Promise<CardResult> {
+  process.stderr.write(`[PayClaw:info] getCard called: merchant=${input.merchant} amount=$${input.estimated_amount}\n`);
+
   if (!getStoredConsentKey()) {
+    process.stderr.write(`[PayClaw:error] getCard: no consent key found\n`);
     return {
       product_name: "PayClaw",
       status: "error",
@@ -220,8 +223,11 @@ export async function getCard(input: GetCardInput): Promise<CardResult> {
 
   if (api.isApiMode()) {
     try {
-      return await getCardViaApi(input);
+      const result = await getCardViaApi(input);
+      process.stderr.write(`[PayClaw:info] getCard result: status=${result.status}\n`);
+      return result;
     } catch (err) {
+      process.stderr.write(`[PayClaw:error] getCard API error: ${err instanceof Error ? err.message : String(err)}\n`);
       return {
         product_name: "PayClaw",
         status: "error",
