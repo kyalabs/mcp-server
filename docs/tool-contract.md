@@ -16,9 +16,9 @@ Formal input/output contract for MCP tools in `@payclaw/mcp-server` and `@paycla
 
 ### payclaw_getAgentIdentity
 
-**Input:** `{ merchant?: string }` — Optional merchant/website the agent intends to visit.
+**Input:** `{ merchant?: string, merchantUrl?: string }` — Optional merchant name or base URL. When `merchantUrl` is provided, PayClaw fetches the merchant's `/.well-known/ucp` manifest and returns a `checkoutPatch` if `io.payclaw.common.identity` is declared.
 
-**Output:** Text + JSON. Keys include `verification_token`, `agent_disclosure`, `assurance_level`. If `activation_required`, user must complete device flow at `/activate`.
+**Output:** Text + JSON. Keys include `verification_token`, `agent_disclosure`, `assurance_level`, `ucpCapable`, `checkoutPatch` (when UCP-capable). If `activation_required`, user must complete device flow at `/activate`.
 
 **App route:** `POST /api/agent-identity` (with Bearer token after auth).
 
@@ -26,9 +26,9 @@ Formal input/output contract for MCP tools in `@payclaw/mcp-server` and `@paycla
 
 ### payclaw_reportBadgePresented
 
-**Input:** `{ verification_token: string, merchant: string, context?: "arrival" | "addtocart" | "checkout" | "other" }` — Token from getAgentIdentity; merchant where badge is being presented; optional context when Extended Auth enabled.
+**Input:** `{ verification_token: string, merchant?: string, merchantUrl?: string, context?: "arrival" | "addtocart" | "checkout" | "other", checkoutSessionId?: string }` — Token from getAgentIdentity; `merchantUrl` (preferred) or `merchant` (at least one required); optional context; optional UCP checkout session ID.
 
-**Output:** Text confirmation. Starts outcome tracking. When Extended Auth is enabled, your agent confirms merchant response; results logged to dashboard. Otherwise, agent reports via payclaw_reportBadgeOutcome.
+**Output:** `{ recorded: true }` JSON in first content block + text confirmation. Starts outcome tracking. When Extended Auth is enabled, PayClaw checks back 7 seconds later. Otherwise, agent reports via payclaw_reportBadgeOutcome.
 
 **App route:** `POST /api/badge/report` (with optional `presentation_context`).
 
@@ -76,21 +76,31 @@ Formal input/output contract for MCP tools in `@payclaw/mcp-server` and `@paycla
 
 ## @payclaw/badge (Badge only)
 
+Same tool signatures as mcp-server (synced since 0.7, PRD-3 parameters added in 0.8.0).
+
 ### payclaw_getAgentIdentity
 
-Same as mcp-server. Optional `merchant` input.
+**Input:** `{ merchant?: string, merchantUrl?: string }` — identical to mcp-server.
 
 ### payclaw_reportBadgePresented
 
-**Input:** `{ verification_token, merchant, context? }` — same signature as mcp-server since 0.7.
+**Input:** `{ verification_token: string, merchant?: string, merchantUrl?: string, context?: string, checkoutSessionId?: string }` — identical to mcp-server.
 
 ### payclaw_reportBadgeOutcome
 
-**Input:** `{ verification_token, merchant, outcome }` — report whether merchant accepted or denied the badge.
+**Input:** `{ verification_token: string, merchant: string, outcome: "accepted" | "denied" | "inconclusive" }` — report whether merchant accepted or denied the badge.
 
 ### payclaw_reportBadgeNotPresented
 
-**Input:** `{ verification_token, merchant, reason? }` — report that the badge was not presented (e.g. merchant has no UCP support).
+**Input:** `{ verification_token: string, merchant: string, reason: "abandoned" | "merchant_didnt_ask" | "other" }` — report that the badge was not presented.
+
+### verify() (merchant-side)
+
+**Import:** `import { verify } from '@payclaw/badge/verify'`
+
+**Input:** `verify(token: string, options?: VerifyOptions)` — ES256 JWT verification via JWKS.
+
+**Output:** `PayClawIdentity | null` — never throws. Returns `null` on any failure.
 
 ---
 

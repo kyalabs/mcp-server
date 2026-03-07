@@ -72,9 +72,11 @@ If you see engine or compatibility errors:
 
 ## UCP Identity Linking
 
-PayClaw Badge is a [UCP (Universal Commerce Protocol)](https://ucp.dev) Credential Provider. Merchants who declare the PayClaw identity extension signal to every UCP-compliant agent that authorized agents are preferred at their store.
+PayClaw Badge is a [UCP (Universal Commerce Protocol)](https://ucp.dev) Credential Provider. Merchants who add `io.payclaw.common.identity` to their `/.well-known/ucp` manifest signal that authorized agents are preferred at their store.
 
-When your agent encounters a UCP merchant with PayClaw installed, it presents a cryptographic badge automatically — no extra steps.
+When your agent calls `payclaw_getAgentIdentity` with a `merchantUrl`, PayClaw fetches the merchant's manifest, checks for the PayClaw extension, and returns a `checkoutPatch` the agent merges into the checkout payload. If the merchant doesn't support UCP, a valid token is still returned — nothing breaks.
+
+Merchants verify badges locally with [`verify()` from `@payclaw/badge`](https://github.com/payclaw/ucp-agent-badge#merchant-verification) — 10 lines, zero dependencies, no API call.
 
 - Extension spec + schema: [github.com/payclaw/ucp-agent-badge](https://github.com/payclaw/ucp-agent-badge)
 - Merchant documentation: [payclaw.io/merchants](https://payclaw.io/merchants)
@@ -99,22 +101,27 @@ See [docs/tool-contract.md](docs/tool-contract.md) for the formal input/output c
 
 | Tool | What It Does |
 |------|-------------|
-| `payclaw_getAgentIdentity` | Declare identity → get verification token (Badge) |
-| `payclaw_reportBadgePresented` | Log that you're presenting your badge at a merchant |
+| `payclaw_getAgentIdentity` | Declare identity → get verification token + UCP `checkoutPatch` (Badge) |
+| `payclaw_reportBadgePresented` | Record that you presented your badge at a merchant |
 | `payclaw_reportBadgeOutcome` | Report how the merchant responded (accepted, denied, inconclusive) |
+| `payclaw_reportBadgeNotPresented` | Report that you did not present your badge (abandoned, merchant didn't ask) |
 | `payclaw_getCard` | Declare purchase intent → get virtual Visa (Spend) |
 | `payclaw_reportPurchase` | Report transaction outcome → close the audit trail |
 
 ### Badge: Declare Identity
 
 ```
-Agent → payclaw_getAgentIdentity
-PayClaw → verification token + disclosure text
-Agent → presents disclosure to merchant (payclaw_reportBadgePresented)
+Agent → payclaw_getAgentIdentity({ merchantUrl })
+PayClaw → fetches merchant's /.well-known/ucp manifest
+PayClaw → verification token + checkoutPatch (if merchant supports UCP)
+Agent → merges checkoutPatch into checkout payload
+Agent → payclaw_reportBadgePresented({ merchantUrl, verification_token })
 Agent → payclaw_reportBadgeOutcome (accepted | denied | inconclusive)
 ```
 
-When Extended Auth is enabled, your agent confirms whether the merchant accepted or denied; responses are logged to your dashboard so you can see visibility of your token by merchant. Otherwise, your agent reports the outcome via `payclaw_reportBadgeOutcome`.
+When `merchantUrl` is provided, PayClaw checks if the merchant supports `io.payclaw.common.identity` via UCP and returns a `checkoutPatch` the agent merges into the checkout payload. If the merchant doesn't support UCP, a valid token is still returned — nothing breaks.
+
+When Extended Auth is enabled, PayClaw checks back with your agent 7 seconds after presentation. Otherwise, your agent reports the outcome via `payclaw_reportBadgeOutcome`.
 
 Your agent is now a declared, authorized actor. Not anonymous traffic.
 
@@ -183,6 +190,19 @@ PayClaw is KYA infrastructure. Every declaration creates a verified record of ag
 
 - [Trust & Verification](https://payclaw.io/trust) — The full trust architecture
 - [Dashboard](https://payclaw.io/dashboard/badge) — Your agent's Verified Trips
+
+---
+
+## What's New (v0.8.0)
+
+| Capability | Description |
+|---|---|
+| UCP-aware `getAgentIdentity` | Pass `merchantUrl` — PayClaw fetches the merchant's `/.well-known/ucp` manifest and returns a `checkoutPatch` when `io.payclaw.common.identity` is declared |
+| `reportBadgePresented` with `merchantUrl` | Preferred over `merchant`; includes optional `checkoutSessionId` for UCP session tracking |
+| `reportBadgeNotPresented` | New tool — report when badge was not presented (abandoned, merchant didn't ask) |
+| SSRF-protected manifest fetcher | HTTPS-only, private IP blocking, 5-minute domain cache, 3-second timeout |
+| Trip lifecycle hardening | `onServerClose` resolves as `inconclusive` (not `accepted`); orphan token recovery on restart |
+| Operational logging | Auth mode on startup; reaper logs active trips |
 
 ---
 
