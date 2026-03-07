@@ -38,6 +38,7 @@ describe("handleReportBadgePresented (payclaw_reportBadgePresented tool)", () =>
     expect(reportBadge.reportBadgePresented).toHaveBeenCalledWith(
       "tok_abc123xyz",
       "merchant.com",
+      undefined,
       undefined
     );
   });
@@ -56,7 +57,7 @@ describe("handleReportBadgePresented (payclaw_reportBadgePresented tool)", () =>
   it("passes context to reportBadgePresented when provided", async () => {
     await handleReportBadgePresented("tok", "m", "checkout");
 
-    expect(reportBadge.reportBadgePresented).toHaveBeenCalledWith("tok", "m", "checkout");
+    expect(reportBadge.reportBadgePresented).toHaveBeenCalledWith("tok", "m", "checkout", undefined);
   });
 
   it("returns response with empty merchant without throwing", async () => {
@@ -64,6 +65,6 @@ describe("handleReportBadgePresented (payclaw_reportBadgePresented tool)", () =>
 
     expect(result.content).toHaveLength(1);
     expect(sampling.onIdentityPresented).toHaveBeenCalledWith("tok_xyz", "");
-    expect(reportBadge.reportBadgePresented).toHaveBeenCalledWith("tok_xyz", "", undefined);
+    expect(reportBadge.reportBadgePresented).toHaveBeenCalledWith("tok_xyz", "", undefined, undefined);
   });
 });
