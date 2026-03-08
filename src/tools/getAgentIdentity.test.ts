@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { getAgentIdentity, formatIdentityResponse } from "./getAgentIdentity.js";
 import * as api from "../api/client.js";
-import { PayClawApiError } from "../api/client.js";
 import * as storage from "../lib/storage.js";
 
 vi.mock("../api/client.js", async (importActual) => {
@@ -36,7 +35,7 @@ describe("getAgentIdentity — 401 handling", () => {
   });
 
   it("surfaces session_expired when OAuth token gets 401", async () => {
-    const authError = new PayClawApiError(
+    const authError = new api.PayClawApiError(
       "Your PayClaw session has expired. To continue, add a permanent API key to your MCP config:\n\n" +
       "  1. Get a key: https://www.payclaw.io/dashboard/keys\n" +
       "  2. Add to your MCP config: PAYCLAW_API_KEY=pk_live_...\n\n" +
@@ -65,6 +64,30 @@ describe("getAgentIdentity — 401 handling", () => {
     expect(result.session_expired).toBeUndefined();
     // Should fall back to local identity
     expect(result.verification_token).toBe("pc_v1_expired_token");
+  });
+
+  it("surfaces session_expired when API key gets 401", async () => {
+    // Simulate PAYCLAW_API_KEY path (callWithKey) — set the env var
+    process.env.PAYCLAW_API_KEY = "pk_live_invalid_key";
+    vi.mocked(storage.getStoredConsentKey).mockReturnValue("pk_live_invalid_key");
+
+    const authError = new api.PayClawApiError(
+      "Your PayClaw session has expired. To continue, add a permanent API key to your MCP config:\n\n" +
+      "  1. Get a key: https://www.payclaw.io/dashboard/keys\n" +
+      "  2. Add to your MCP config: PAYCLAW_API_KEY=pk_live_...\n\n" +
+      "Permanent keys don't expire. See: https://www.payclaw.io/docs/mcp-setup",
+      401
+    );
+    vi.mocked(api.getAgentIdentity).mockRejectedValue(authError);
+
+    const result = await getAgentIdentity("test-merchant");
+
+    expect(result.session_expired).toBe(true);
+    expect(result.status).toBe("session_expired");
+    expect(result.message).toContain("session has expired");
+    expect(result.principal_verified).toBe(false);
+
+    delete process.env.PAYCLAW_API_KEY;
   });
 
   it("formats session_expired result with directed action", async () => {

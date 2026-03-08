@@ -8,6 +8,7 @@ describe("401 error handling", () => {
     vi.stubGlobal("fetch", mockFetch);
     process.env.PAYCLAW_API_URL = "https://www.payclaw.io";
     process.env.PAYCLAW_API_KEY = "pk_live_test_key";
+    mockFetch.mockResolvedValue({ ok: false, status: 401, headers: new Headers() });
   });
 
   afterEach(() => {
@@ -17,32 +18,19 @@ describe("401 error handling", () => {
     delete process.env.PAYCLAW_API_KEY;
   });
 
-  it("401 response throws PayClawApiError with directed action", async () => {
-    mockFetch.mockResolvedValue({
-      ok: false,
-      status: 401,
-      headers: new Headers(),
-    });
-
-    await expect(getAgentIdentity(undefined, "test-merchant")).rejects.toThrow(PayClawApiError);
-    await expect(getAgentIdentity(undefined, "test-merchant")).rejects.toThrow(/session has expired/i);
-    await expect(getAgentIdentity(undefined, "test-merchant")).rejects.toThrow(/payclaw\.io\/dashboard\/keys/i);
-    await expect(getAgentIdentity(undefined, "test-merchant")).rejects.toThrow(/PAYCLAW_API_KEY/i);
-  });
-
-  it("401 error has statusCode 401", async () => {
-    mockFetch.mockResolvedValue({
-      ok: false,
-      status: 401,
-      headers: new Headers(),
-    });
-
+  it("throws PayClawApiError with directed action on 401", async () => {
+    let caught: unknown;
     try {
       await getAgentIdentity(undefined, "test-merchant");
-      expect.fail("Should have thrown");
     } catch (err) {
-      expect(err).toBeInstanceOf(PayClawApiError);
-      expect((err as PayClawApiError).statusCode).toBe(401);
+      caught = err;
     }
+
+    expect(caught).toBeInstanceOf(PayClawApiError);
+    const err = caught as PayClawApiError;
+    expect(err.statusCode).toBe(401);
+    expect(err.message).toMatch(/session has expired/i);
+    expect(err.message).toMatch(/payclaw\.io\/dashboard\/keys/i);
+    expect(err.message).toMatch(/PAYCLAW_API_KEY/i);
   });
 });

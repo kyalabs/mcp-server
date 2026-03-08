@@ -1,6 +1,5 @@
 // Canonical: badge-server | Synced: PRD-3 | mcp-server syncs from here
 import * as api from "../api/client.js";
-import { PayClawApiError } from "../api/client.js";
 import { getStoredConsentKey } from "../lib/storage.js";
 import { initiateDeviceAuth, pollForApproval } from "../lib/device-auth.js";
 import { fetchUCPManifest, findPayClawCapability, isVersionCompatible } from "../lib/ucp-manifest.js";
@@ -173,10 +172,28 @@ async function callWithKey(apiKey: string, merchant?: string): Promise<IdentityR
       ...result,
     };
   } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    process.stderr.write(`[PayClaw] API key identity failed: ${msg}\n`);
+
+    if (err instanceof api.PayClawApiError && err.statusCode === 401) {
+      return {
+        product_name: "PayClaw Badge",
+        status: "session_expired",
+        agent_disclosure: "PayClaw session expired",
+        verification_token: "",
+        trust_url: "https://www.payclaw.io/trust",
+        contact: "agent_identity@payclaw.io",
+        principal_verified: false,
+        spend_available: false,
+        session_expired: true,
+        message: msg,
+      };
+    }
+
     return {
       product_name: "PayClaw Badge",
       status: "error",
-      message: err instanceof Error ? err.message : String(err),
+      message: msg,
     };
   }
 }
@@ -203,7 +220,7 @@ async function callWithOAuthToken(token: string, merchant?: string): Promise<Ide
     process.stderr.write(`[PayClaw] OAuth identity API failed: ${msg}\n`);
 
     // Auth failure: surface it — don't hide behind a local fallback
-    if (err instanceof PayClawApiError && err.statusCode === 401) {
+    if (err instanceof api.PayClawApiError && err.statusCode === 401) {
       return {
         product_name: "PayClaw Badge",
         status: "session_expired",
