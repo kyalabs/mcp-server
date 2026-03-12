@@ -52,7 +52,7 @@ Enable with `PAYCLAW_EXTENDED_AUTH=true`:
 
 ```json
 "env": {
-  "PAYCLAW_API_URL": "https://payclaw.io",
+  "PAYCLAW_API_URL": "https://www.payclaw.io",
   "PAYCLAW_EXTENDED_AUTH": "true"
 }
 ```
