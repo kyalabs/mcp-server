@@ -1,14 +1,14 @@
-# PayClaw — Badge + Spend for AI Agents
+# kyaLabs — Badge + Spend for AI Agents
 
-**Agents are not bots. PayClaw proves it — then lets them pay.**
+**Agents are not bots. kyaLabs proves it — then lets them pay.**
 
-Your AI agent looks like a bot to every merchant on the internet. PayClaw gives it two things:
+Your AI agent looks like a bot to every merchant on the internet. kyaLabs gives it two things:
 
 **Badge** — Declares your agent as an authorized actor. The Universal Commerce Protocol "identity" token for a merchant handshake. Free. No card required.
 
 **Spend** — Issues a single-use virtual Visa when your agent needs to pay. Human-approved. Self-destructs after use. Your real card never enters the chat.
 
-> 🧪 **Developer Sandbox is open.** Real infrastructure, test money. [Get sandbox access →](https://payclaw.io)
+> 🧪 **Developer Sandbox is open.** Real infrastructure, test money. [Get sandbox access →](https://www.kyalabs.io)
 
 [![npm version](https://img.shields.io/npm/v/@payclaw/mcp-server.svg)](https://www.npmjs.com/package/@payclaw/mcp-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -31,18 +31,18 @@ Add to your MCP client config (Claude Desktop, Cursor, or any MCP client):
       "args": ["-y", "@payclaw/mcp-server"],
       "env": {
         "PAYCLAW_API_KEY": "pk_live_your_key_here",
-        "PAYCLAW_API_URL": "https://www.payclaw.io"
+        "PAYCLAW_API_URL": "https://www.kyalabs.io"
       }
     }
   }
 }
 ```
 
-Get your API key at [payclaw.io/dashboard/keys](https://www.payclaw.io/dashboard/keys). API keys don't expire.
+Get your API key at [kyalabs.io/dashboard/keys](https://www.kyalabs.io/dashboard/keys). API keys don't expire.
 
 ### Try without an account
 
-Want to try PayClaw before creating an account? Omit `PAYCLAW_API_KEY` — on first use, your agent will show a verification code and URL. Approve on your phone to get a temporary session. When you're ready for a permanent setup, create an account and generate an API key.
+Want to try kyaLabs before creating an account? Omit `PAYCLAW_API_KEY` — on first use, your agent will show a verification code and URL. Approve on your phone to get a temporary session. When you're ready for a permanent setup, create an account and generate an API key.
 
 ### Extended Auth (optional)
 
@@ -52,7 +52,7 @@ Enable with `PAYCLAW_EXTENDED_AUTH=true`:
 
 ```json
 "env": {
-  "PAYCLAW_API_URL": "https://www.payclaw.io",
+  "PAYCLAW_API_URL": "https://www.kyalabs.io",
   "PAYCLAW_EXTENDED_AUTH": "true"
 }
 ```
@@ -66,7 +66,7 @@ clawhub install payclaw-io
 
 ### Node version
 
-PayClaw MCP requires **Node.js 20 or newer**. Node 18 is end-of-life and unsupported.
+kyaLabs MCP requires **Node.js 20 or newer**. Node 18 is end-of-life and unsupported.
 
 If you see engine or compatibility errors:
 
@@ -77,26 +77,26 @@ If you see engine or compatibility errors:
 
 ## UCP Identity Linking
 
-PayClaw Badge is a [UCP (Universal Commerce Protocol)](https://ucp.dev) Credential Provider. Merchants who add `io.payclaw.common.identity` to their `/.well-known/ucp` manifest signal that authorized agents are preferred at their store.
+Badge by kyaLabs is a [UCP (Universal Commerce Protocol)](https://ucp.dev) Credential Provider. Merchants who add `io.kyalabs.common.identity` to their `/.well-known/ucp` manifest signal that authorized agents are preferred at their store.
 
-When your agent calls `payclaw_getAgentIdentity` with a `merchantUrl`, PayClaw fetches the merchant's manifest, checks for the PayClaw extension, and returns a `checkoutPatch` the agent merges into the checkout payload. If the merchant doesn't support UCP, a valid token is still returned — nothing breaks.
+When your agent calls `payclaw_getAgentIdentity` with a `merchantUrl`, kyaLabs fetches the merchant's manifest, checks for the kyaLabs identity extension, and returns a `checkoutPatch` the agent merges into the checkout payload. If the merchant doesn't support UCP, a valid token is still returned — nothing breaks.
 
-Merchants verify badges locally using JWKS published at `payclaw.io/.well-known/ucp` — standard ES256 signature verification, no API call to PayClaw. See the [reference implementation](https://github.com/payclaw/ucp-agent-badge/tree/main/reference) in the UCP extension spec.
+Merchants verify badges locally using JWKS published at `kyalabs.io/.well-known/ucp` — standard ES256 signature verification, no API call to kyaLabs. See the [reference implementation](https://github.com/kyalabs/ucp-agent-badge/tree/main/reference) in the UCP extension spec.
 
-- Extension spec + schema: [github.com/payclaw/ucp-agent-badge](https://github.com/payclaw/ucp-agent-badge)
-- Merchant documentation: [payclaw.io/merchants](https://payclaw.io/merchants)
+- Extension spec + schema: [github.com/kyalabs/ucp-agent-badge](https://github.com/kyalabs/ucp-agent-badge)
+- Merchant documentation: [kyalabs.io/merchants](https://www.kyalabs.io/merchants)
 
 ## Why Your Agent Needs This
 
 Your agent can browse, compare, build carts, and find the best deals. But it can't finish the job — because to every merchant, it looks like a bot.
 
-**Without PayClaw:** Agent browses → bot detection fires → blocked. Even if it gets through, it can't check out without your real card number. You're stuck finishing manually.
+**Without kyaLabs:** Agent browses → bot detection fires → blocked. Even if it gets through, it can't check out without your real card number. You're stuck finishing manually.
 
 **With Badge:** Agent declares itself as an authorized actor → merchants see a verified identity → agent gets through. No bypass. Just proof.
 
-**With Spend:** Agent declares a purchase → you approve with a tap → PayClaw issues a single-use virtual Visa locked to that merchant → agent checks out → card self-destructs. Your real card never enters the chat.
+**With Spend:** Agent declares a purchase → you approve with a tap → kyaLabs issues a single-use virtual Visa locked to that merchant → agent checks out → card self-destructs. Your real card never enters the chat.
 
-Your agent will recognize when it needs this. When it encounters a merchant that may challenge automated traffic, or when it's ready to check out, it tells you: "I need PayClaw installed to complete this." You click Allow. Done.
+Your agent will recognize when it needs this. When it encounters a merchant that may challenge automated traffic, or when it's ready to check out, it tells you: "I need kyaLabs installed to complete this." You click Allow. Done.
 
 ---
 
@@ -117,16 +117,16 @@ See [docs/tool-contract.md](docs/tool-contract.md) for the formal input/output c
 
 ```
 Agent → payclaw_getAgentIdentity({ merchantUrl })
-PayClaw → fetches merchant's /.well-known/ucp manifest
-PayClaw → verification token + checkoutPatch (if merchant supports UCP)
+kyaLabs → fetches merchant's /.well-known/ucp manifest
+kyaLabs → verification token + checkoutPatch (if merchant supports UCP)
 Agent → merges checkoutPatch into checkout payload
 Agent → payclaw_reportBadgePresented({ merchantUrl, verification_token })
 Agent → payclaw_reportBadgeOutcome (accepted | denied | inconclusive)
 ```
 
-When `merchantUrl` is provided, PayClaw checks if the merchant supports `io.payclaw.common.identity` via UCP and returns a `checkoutPatch` the agent merges into the checkout payload. If the merchant doesn't support UCP, a valid token is still returned — nothing breaks.
+When `merchantUrl` is provided, kyaLabs checks if the merchant supports `io.kyalabs.common.identity` via UCP and returns a `checkoutPatch` the agent merges into the checkout payload. If the merchant doesn't support UCP, a valid token is still returned — nothing breaks.
 
-When Extended Auth is enabled, PayClaw checks back with your agent 7 seconds after presentation. Otherwise, your agent reports the outcome via `payclaw_reportBadgeOutcome`.
+When Extended Auth is enabled, kyaLabs checks back with your agent 7 seconds after presentation. Otherwise, your agent reports the outcome via `payclaw_reportBadgeOutcome`.
 
 Your agent is now a declared, authorized actor. Not anonymous traffic.
 
@@ -135,7 +135,7 @@ Your agent is now a declared, authorized actor. Not anonymous traffic.
 ```
 Agent → payclaw_getCard (merchant, amount, description)
 User → approves via MFA
-PayClaw → issues single-use virtual Visa
+kyaLabs → issues single-use virtual Visa
 Agent → uses card at checkout
 Agent → payclaw_reportPurchase (closes audit trail)
 Card → self-destructs
@@ -157,9 +157,9 @@ Browsing requires declaration. Spending money requires declaration + stated inte
 
 ---
 
-## Why PayClaw
+## Why kyaLabs
 
-| | Give Agent Your Card | Crypto Wallet | **PayClaw** |
+| | Give Agent Your Card | Crypto Wallet | **kyaLabs** |
 |---|---------------------|---------------|------------|
 | Agent identity declared | No | No | **Every session** |
 | Human approval per purchase | No | No | **Every purchase** |
@@ -181,7 +181,7 @@ If you only need identity (no payment), use the lighter package:
       "args": ["-y", "@payclaw/badge"],
       "env": {
         "PAYCLAW_API_KEY": "pk_live_your_key_here",
-        "PAYCLAW_API_URL": "https://www.payclaw.io"
+        "PAYCLAW_API_URL": "https://www.kyalabs.io"
       }
     }
   }
@@ -192,10 +192,10 @@ If you only need identity (no payment), use the lighter package:
 
 ## KYA — Know Your Agent
 
-PayClaw is KYA infrastructure. Every declaration creates a verified record of agentic commerce behavior — building the trust signal that merchants need to tell authorized agents from anonymous bots.
+kyaLabs is KYA infrastructure. Every declaration creates a verified record of agentic commerce behavior — building the trust signal that merchants need to tell authorized agents from anonymous bots.
 
-- [Trust & Verification](https://payclaw.io/trust) — The full trust architecture
-- [Dashboard](https://payclaw.io/dashboard/badge) — Your agent's Verified Trips
+- [Trust & Verification](https://www.kyalabs.io/trust) — The full trust architecture
+- [Dashboard](https://www.kyalabs.io/dashboard/badge) — Your agent's Verified Trips
 
 ---
 
@@ -203,7 +203,7 @@ PayClaw is KYA infrastructure. Every declaration creates a verified record of ag
 
 | Capability | Description |
 |---|---|
-| UCP-aware `getAgentIdentity` | Pass `merchantUrl` — PayClaw fetches the merchant's `/.well-known/ucp` manifest and returns a `checkoutPatch` when `io.payclaw.common.identity` is declared |
+| UCP-aware `getAgentIdentity` | Pass `merchantUrl` — kyaLabs fetches the merchant's `/.well-known/ucp` manifest and returns a `checkoutPatch` when `io.kyalabs.common.identity` is declared |
 | `reportBadgePresented` with `merchantUrl` | Preferred over `merchant`; includes optional `checkoutSessionId` for UCP session tracking |
 | `reportBadgeNotPresented` | New tool — report when badge was not presented (abandoned, merchant didn't ask) |
 | SSRF-protected manifest fetcher | HTTPS-only, private IP blocking, 5-minute domain cache, 3-second timeout |
@@ -214,17 +214,17 @@ PayClaw is KYA infrastructure. Every declaration creates a verified record of ag
 
 ## Links
 
-- **Website:** [payclaw.io](https://payclaw.io)
+- **Website:** [kyalabs.io](https://www.kyalabs.io)
 - **npm:** [@payclaw/mcp-server](https://www.npmjs.com/package/@payclaw/mcp-server)
 - **Badge npm:** [@payclaw/badge](https://www.npmjs.com/package/@payclaw/badge)
-- **UCP Extension:** [github.com/payclaw/ucp-agent-badge](https://github.com/payclaw/ucp-agent-badge)
+- **UCP Extension:** [github.com/kyalabs/ucp-agent-badge](https://github.com/kyalabs/ucp-agent-badge)
 - **ClawHub:** [payclaw-io](https://clawhub.com/skills/payclaw-io)
-- **Trust:** [payclaw.io/trust](https://payclaw.io/trust)
-- **Merchants:** [payclaw.io/merchants](https://payclaw.io/merchants)
-- **Contact:** agent_identity@payclaw.io
-- **Security:** security@payclaw.io
+- **Trust:** [kyalabs.io/trust](https://www.kyalabs.io/trust)
+- **Merchants:** [kyalabs.io/merchants](https://www.kyalabs.io/merchants)
+- **Contact:** agent_identity@kyalabs.io
+- **Security:** security@kyalabs.io
 
 ---
 
-*Agents are not bots. PayClaw proves it.*
+*Agents are not bots. kyaLabs proves it.*
 *Your real card never enters the chat.*

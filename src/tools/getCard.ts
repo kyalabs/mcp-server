@@ -59,7 +59,7 @@ export function formatCardResponse(r: CardResult, merchant?: string, amount?: nu
       `  Reason:     ${r.reason || r.message || 'Denied by policy'}`,
       `  Balance:    $${r.remaining_balance?.toFixed(2) ?? 'N/A'}`,
       ``,
-      `  Fund your PayClaw balance at payclaw.io/dashboard to try again.`,
+      `  Fund your kyaLabs balance at kyalabs.io/dashboard to try again.`,
     ].join('\n');
   }
 
@@ -126,11 +126,11 @@ async function getCardViaApi(input: GetCardInput): Promise<CardResult> {
   if (intent.status !== "approved" && intent.status !== "pending_approval") {
     const balance = await api.getBalance();
     return {
-      product_name: "PayClaw",
+      product_name: "kyaLabs",
       status: "denied",
       intent_id: intent.id,
       reason: typeof intent.policy_result === "object" && intent.policy_result ? (intent.policy_result as Record<string, unknown>).reason as string ?? "denied" : "denied",
-      message: `PayClaw denied: ${typeof intent.policy_result === "object" && intent.policy_result ? (intent.policy_result as Record<string, unknown>).reason ?? intent.status : intent.status}`,
+      message: `kyaLabs denied: ${typeof intent.policy_result === "object" && intent.policy_result ? (intent.policy_result as Record<string, unknown>).reason ?? intent.status : intent.status}`,
       remaining_balance: balance.available_cents / 100,
     };
   }
@@ -138,12 +138,12 @@ async function getCardViaApi(input: GetCardInput): Promise<CardResult> {
   if (intent.status === "pending_approval") {
     const balance = await api.getBalance();
     return {
-      product_name: "PayClaw",
+      product_name: "kyaLabs",
       status: "pending_approval",
       intent_id: intent.id,
       merchant_url: merchantUrl,
       estimated_amount: estimated_amount,
-      message: `PayClaw requires your approval. Ask the user to approve $${estimated_amount.toFixed(2)} at ${merchant}.`,
+      message: `kyaLabs requires your approval. Ask the user to approve $${estimated_amount.toFixed(2)} at ${merchant}.`,
       approve_endpoint: `/api/intents/${intent.id}/approve`,
       remaining_balance: balance.available_cents / 100,
     };
@@ -153,7 +153,7 @@ async function getCardViaApi(input: GetCardInput): Promise<CardResult> {
   const card = await api.getCard(intent.id);
 
   return {
-    product_name: "PayClaw",
+    product_name: "kyaLabs",
     status: "approved",
     intent_id: intent.id,
     merchant: merchant,
@@ -181,10 +181,10 @@ function getCardViaMock(input: GetCardInput): CardResult {
 
   if (estimated_amount > balance) {
     return {
-      product_name: "PayClaw",
+      product_name: "kyaLabs",
       status: "denied",
       reason: "insufficient_balance",
-      message: `PayClaw denied: Requested $${estimated_amount.toFixed(2)} but your PayClaw balance is only $${balance.toFixed(2)} available.`,
+      message: `kyaLabs denied: Requested $${estimated_amount.toFixed(2)} but your kyaLabs balance is only $${balance.toFixed(2)} available.`,
       remaining_balance: balance,
     };
   }
@@ -192,7 +192,7 @@ function getCardViaMock(input: GetCardInput): CardResult {
   const intent = createIntent(merchant, estimated_amount, description);
 
   return {
-    product_name: "PayClaw",
+    product_name: "kyaLabs",
     status: "approved",
     intent_id: intent.intent_id,
     merchant: merchant,
@@ -210,12 +210,12 @@ function getCardViaMock(input: GetCardInput): CardResult {
 }
 
 export async function getCard(input: GetCardInput): Promise<CardResult> {
-  process.stderr.write(`[PayClaw:info] getCard called: merchant=${input.merchant} amount=$${input.estimated_amount}\n`);
+  process.stderr.write(`[kyaLabs:info] getCard called: merchant=${input.merchant} amount=$${input.estimated_amount}\n`);
 
   if (!getStoredConsentKey()) {
-    process.stderr.write(`[PayClaw:error] getCard: no consent key found\n`);
+    process.stderr.write(`[kyaLabs:error] getCard: no consent key found\n`);
     return {
-      product_name: "PayClaw",
+      product_name: "kyaLabs",
       status: "error",
       message: "Not authenticated. Run payclaw_getAgentIdentity first to activate your agent, or set PAYCLAW_API_KEY in your MCP config.",
     };
@@ -224,12 +224,12 @@ export async function getCard(input: GetCardInput): Promise<CardResult> {
   if (api.isApiMode()) {
     try {
       const result = await getCardViaApi(input);
-      process.stderr.write(`[PayClaw:info] getCard result: status=${result.status}\n`);
+      process.stderr.write(`[kyaLabs:info] getCard result: status=${result.status}\n`);
       return result;
     } catch (err) {
-      process.stderr.write(`[PayClaw:error] getCard API error: ${err instanceof Error ? err.message : String(err)}\n`);
+      process.stderr.write(`[kyaLabs:error] getCard API error: ${err instanceof Error ? err.message : String(err)}\n`);
       return {
-        product_name: "PayClaw",
+        product_name: "kyaLabs",
         status: "error",
         message: err instanceof Error ? err.message : String(err),
       };

@@ -19,7 +19,7 @@ async function reportViaApi(input: ReportPurchaseInput): Promise<object> {
     const tx = await api.reportTransaction(intent_id, merchant_name, undefined, 0);
     const balance = await api.getBalance();
     return {
-      product_name: "PayClaw",
+      product_name: "kyaLabs",
       status: "recorded",
       intent_match: null,
       transaction_id: tx.id,
@@ -33,7 +33,7 @@ async function reportViaApi(input: ReportPurchaseInput): Promise<object> {
   const balance = await api.getBalance();
 
   return {
-    product_name: "PayClaw",
+    product_name: "kyaLabs",
     status: "recorded",
     intent_match: tx.intent_match,
     ...(tx.intent_mismatch_reason && { intent_mismatch_reason: tx.intent_mismatch_reason }),
@@ -49,7 +49,7 @@ function reportViaMock(input: ReportPurchaseInput): object {
   const intent = getIntent(intent_id);
   if (!intent) {
     return {
-      product_name: "PayClaw",
+      product_name: "kyaLabs",
       status: "error",
       message: `Intent ${intent_id} not found.`,
     };
@@ -57,7 +57,7 @@ function reportViaMock(input: ReportPurchaseInput): object {
 
   if (intent.status !== "pending") {
     return {
-      product_name: "PayClaw",
+      product_name: "kyaLabs",
       status: "error",
       message: `Intent ${intent_id} has already been reported (status: ${intent.status}).`,
     };
@@ -67,7 +67,7 @@ function reportViaMock(input: ReportPurchaseInput): object {
     intent.status = "failed";
     updateIntent(intent);
     return {
-      product_name: "PayClaw",
+      product_name: "kyaLabs",
       status: "recorded",
       intent_match: null,
       transaction_id: randomUUID(),
@@ -87,7 +87,7 @@ function reportViaMock(input: ReportPurchaseInput): object {
   updateIntent(intent);
 
   return {
-    product_name: "PayClaw",
+    product_name: "kyaLabs",
     status: "recorded",
     intent_match,
     transaction_id: randomUUID(),
@@ -103,7 +103,7 @@ function reportViaMock(input: ReportPurchaseInput): object {
 export async function reportPurchase(input: ReportPurchaseInput): Promise<object> {
   if (!getStoredConsentKey()) {
     return {
-      product_name: "PayClaw",
+      product_name: "kyaLabs",
       status: "error",
       message: "Not authenticated. Run payclaw_getAgentIdentity first to activate your agent, or set PAYCLAW_API_KEY in your MCP config.",
     };
@@ -114,7 +114,7 @@ export async function reportPurchase(input: ReportPurchaseInput): Promise<object
       return await reportViaApi(input);
     } catch (err) {
       return {
-        product_name: "PayClaw",
+        product_name: "kyaLabs",
         status: "error",
         message: err instanceof Error ? err.message : String(err),
       };

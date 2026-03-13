@@ -25,17 +25,18 @@
     "fintech",
     "sandbox",
     "visa",
-    "commerce"
+    "commerce",
+    "kyalabs"
   ],
-  "author": "PayClaw <hello@payclaw.io>",
+  "author": "kyaLabs <hello@kyalabs.io>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/payclaw/mcp-server.git"
+    "url": "https://github.com/kyalabs/mcp-server.git"
   },
-  "homepage": "https://payclaw.io",
+  "homepage": "https://www.kyalabs.io",
   "bugs": {
-    "url": "https://github.com/payclaw/mcp-server/issues"
+    "url": "https://github.com/kyalabs/mcp-server/issues"
   },
   "engines": {
     "node": ">=20.0.0"
