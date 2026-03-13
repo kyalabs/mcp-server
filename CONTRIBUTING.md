@@ -1,4 +1,4 @@
-# Contributing to PayClaw MCP Server
+# Contributing to kyaLabs MCP Server
 
 Thanks for your interest in contributing! Here's how to get involved.
 
@@ -14,12 +14,12 @@ Thanks for your interest in contributing! Here's how to get involved.
 ## Development Setup
 
 ```bash
-git clone https://github.com/payclaw/mcp-server.git
+git clone https://github.com/kyalabs/mcp-server.git
 cd mcp-server
 npm install
 ```
 
-You'll need a PayClaw test API key to run locally. Sign up at [payclaw.com](https://payclaw.com) and use a test key (`pk_test_...`).
+You'll need a kyaLabs test API key to run locally. Sign up at [kyalabs.io](https://www.kyalabs.io) and use a test key (`pk_test_...`).
 
 ## Pull Request Guidelines
 
@@ -44,7 +44,7 @@ Open an issue on GitHub with:
 
 ## Security
 
-If you discover a security vulnerability, **do not open a public issue.** Email security@payclaw.com instead. We'll respond within 48 hours.
+If you discover a security vulnerability, **do not open a public issue.** Email security@kyalabs.io instead. We'll respond within 48 hours.
 
 ## License
 

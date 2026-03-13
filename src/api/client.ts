@@ -8,19 +8,19 @@ import type {
 } from "../types.js";
 import { getStoredConsentKey } from "../lib/storage.js";
 
-export class PayClawApiError extends Error {
+export class BadgeApiError extends Error {
   constructor(
     message: string,
     public statusCode?: number,
   ) {
     super(message);
-    this.name = "PayClawApiError";
+    this.name = "BadgeApiError";
   }
 }
 
 /** MCP-safe logging — writes to stderr so it doesn't interfere with stdio protocol. */
 function log(level: "info" | "warn" | "error", msg: string): void {
-  process.stderr.write(`[PayClaw:${level}] ${msg}\n`);
+  process.stderr.write(`[kyaLabs:${level}] ${msg}\n`);
 }
 
 /** SEC-010: Default timeout for all API requests (30 seconds) */
@@ -29,13 +29,13 @@ const REQUEST_TIMEOUT_MS = 30_000;
 function getConfig() {
   const baseUrl = process.env.PAYCLAW_API_URL || getBaseUrl();
   const apiKey = getStoredConsentKey();
-  if (!baseUrl) throw new PayClawApiError("PayClaw API URL is not configured.");
-  if (!apiKey) throw new PayClawApiError("PayClaw API key is not configured.");
+  if (!baseUrl) throw new BadgeApiError("kyaLabs API URL is not configured.");
+  if (!apiKey) throw new BadgeApiError("kyaLabs API key is not configured.");
 
   // SEC-009: Require HTTPS in production
   if (!baseUrl.startsWith("https://") && !baseUrl.startsWith("http://localhost")) {
-    throw new PayClawApiError(
-      "PayClaw API URL must use HTTPS for security.",
+    throw new BadgeApiError(
+      "kyaLabs API URL must use HTTPS for security.",
     );
   }
 
@@ -62,7 +62,7 @@ async function request<T>(url: string, init: RequestInit): Promise<T> {
   let res: Response;
   try {
     // SEC-014: Use manual redirect to preserve Authorization header across redirects.
-    // Node fetch strips Authorization on cross-origin redirects (e.g. payclaw.io → www.payclaw.io).
+    // Node fetch strips Authorization on cross-origin redirects (e.g. kyalabs.io → www.kyalabs.io).
     res = await fetch(url, { ...init, redirect: "manual", signal: controller.signal });
 
     // Follow redirects manually, preserving auth headers
@@ -78,22 +78,22 @@ async function request<T>(url: string, init: RequestInit): Promise<T> {
     clearTimeout(timeout);
     if (err instanceof Error && err.name === "AbortError") {
       log("error", `${method} ${urlPath} → timeout`);
-      throw new PayClawApiError("Request timed out. Please try again.");
+      throw new BadgeApiError("Request timed out. Please try again.");
     }
     log("error", `${method} ${urlPath} → network error`);
     // SEC-013: Generic error message — don't leak URL or config details
-    throw new PayClawApiError("Could not reach the PayClaw API. Please check your configuration.");
+    throw new BadgeApiError("Could not reach the kyaLabs API. Please check your configuration.");
   } finally {
     clearTimeout(timeout);
   }
 
   if (res.status === 401) {
     log("error", `${method} ${urlPath} → 401 unauthorized`);
-    throw new PayClawApiError(
-      "Your PayClaw session has expired. To continue, add a permanent API key to your MCP config:\n\n" +
-      "  1. Get a key: https://www.payclaw.io/dashboard/keys\n" +
+    throw new BadgeApiError(
+      "Your kyaLabs session has expired. To continue, add a permanent API key to your MCP config:\n\n" +
+      "  1. Get a key: https://www.kyalabs.io/dashboard/keys\n" +
       "  2. Add to your MCP config: PAYCLAW_API_KEY=pk_live_...\n\n" +
-      "Permanent keys don't expire. See: https://www.payclaw.io/docs/mcp-setup",
+      "Permanent keys don't expire. See: https://www.kyalabs.io/docs/mcp-setup",
       401,
     );
   }
@@ -107,7 +107,7 @@ async function request<T>(url: string, init: RequestInit): Promise<T> {
       body = await res.text();
     }
     log("error", `${method} ${urlPath} → ${res.status}: ${body.slice(0, 200)}`);
-    throw new PayClawApiError(body, res.status);
+    throw new BadgeApiError(body, res.status);
   }
 
   log("info", `${method} ${urlPath} → ${res.status}`);
@@ -185,13 +185,13 @@ export function isApiMode(): boolean {
   return !!process.env.PAYCLAW_API_URL || !!getStoredConsentKey();
 }
 
-/** Base URL for API calls. Defaults to https://www.payclaw.io (canonical, avoids redirect). */
+/** Base URL for API calls. Defaults to https://www.kyalabs.io (canonical, avoids redirect). */
 export function getBaseUrl(): string {
   const url = process.env.PAYCLAW_API_URL;
   if (url && url.trim().length > 0) {
     return url.trim().replace(/\/+$/, "");
   }
-  return "https://www.payclaw.io";
+  return "https://www.kyalabs.io";
 }
 
 /**

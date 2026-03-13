@@ -1,4 +1,4 @@
-# PayClaw MCP Tool Contract
+# kyaLabs MCP Tool Contract
 
 Formal input/output contract for MCP tools in `@payclaw/mcp-server` and `@payclaw/badge`. Update this doc when tool inputs, outputs, or auth requirements change.
 
@@ -6,7 +6,7 @@ Formal input/output contract for MCP tools in `@payclaw/mcp-server` and `@paycla
 
 ## Auth
 
-- **API key (recommended):** Set `PAYCLAW_API_KEY` (`pk_live_*` or `pk_test_*`). Permanent — does not expire. Get one at [payclaw.io/dashboard/keys](https://www.payclaw.io/dashboard/keys). MCP calls `POST /api/agent-identity` with `Authorization: Bearer pk_...`.
+- **API key (recommended):** Set `PAYCLAW_API_KEY` (`pk_live_*` or `pk_test_*`). Permanent — does not expire. Get one at [kyalabs.io/dashboard/keys](https://www.kyalabs.io/dashboard/keys). MCP calls `POST /api/agent-identity` with `Authorization: Bearer pk_...`.
 - **Device flow (quick start):** No API key needed. OAuth device flow via `POST /api/oauth/device/authorize` and `POST /api/oauth/token`. Consent key stored after user approves at `/activate`. Sessions are temporary — switch to an API key for permanent access.
 - **Extended Auth:** Set `PAYCLAW_EXTENDED_AUTH=true` so your agent confirms whether the merchant accepted or denied. Responses are logged to your dashboard so you can see visibility of your token by merchant. Default: agent reports via payclaw_reportBadgeOutcome.
 
@@ -16,7 +16,7 @@ Formal input/output contract for MCP tools in `@payclaw/mcp-server` and `@paycla
 
 ### payclaw_getAgentIdentity
 
-**Input:** `{ merchant?: string, merchantUrl?: string }` — Optional merchant name or base URL. When `merchantUrl` is provided, PayClaw fetches the merchant's `/.well-known/ucp` manifest and returns a `checkoutPatch` if `io.payclaw.common.identity` is declared.
+**Input:** `{ merchant?: string, merchantUrl?: string }` — Optional merchant name or base URL. When `merchantUrl` is provided, kyaLabs fetches the merchant's `/.well-known/ucp` manifest and returns a `checkoutPatch` if `io.kyalabs.common.identity` is declared.
 
 **Output:** Text + JSON. Keys include `verification_token`, `agent_disclosure`, `assurance_level`, `ucpCapable`, `checkoutPatch` (when UCP-capable). If `activation_required`, user must complete device flow at `/activate`.
 
@@ -28,7 +28,7 @@ Formal input/output contract for MCP tools in `@payclaw/mcp-server` and `@paycla
 
 **Input:** `{ verification_token: string, merchant?: string, merchantUrl?: string, context?: "arrival" | "addtocart" | "checkout" | "other", checkoutSessionId?: string }` — Token from getAgentIdentity; `merchantUrl` (preferred) or `merchant` (at least one required); optional context; optional UCP checkout session ID.
 
-**Output:** `{ recorded: true }` JSON in first content block + text confirmation. Starts outcome tracking. When Extended Auth is enabled, PayClaw checks back 7 seconds later. Otherwise, agent reports via payclaw_reportBadgeOutcome.
+**Output:** `{ recorded: true }` JSON in first content block + text confirmation. Starts outcome tracking. When Extended Auth is enabled, kyaLabs checks back 7 seconds later. Otherwise, agent reports via payclaw_reportBadgeOutcome.
 
 **App route:** `POST /api/badge/report` (with optional `presentation_context`).
 
@@ -96,7 +96,7 @@ Same tool signatures as mcp-server (synced since 0.7, PRD-3 parameters added in 
 
 ### Merchant-side verification
 
-Merchant-side token verification has moved to the [UCP extension spec](https://github.com/payclaw/ucp-agent-badge/tree/main/reference). It is no longer exported from `@payclaw/badge`.
+Merchant-side token verification has moved to the [UCP extension spec](https://github.com/kyalabs/ucp-agent-badge/tree/main/reference). It is no longer exported from `@payclaw/badge`.
 
 ---
 

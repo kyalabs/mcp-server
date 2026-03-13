@@ -25,7 +25,7 @@ describe("getAgentIdentity — 401 handling", () => {
   beforeEach(() => {
     vi.mocked(storage.getStoredConsentKey).mockReturnValue("pc_v1_expired_token");
     vi.mocked(api.isApiMode).mockReturnValue(true);
-    vi.mocked(api.getBaseUrl).mockReturnValue("https://www.payclaw.io");
+    vi.mocked(api.getBaseUrl).mockReturnValue("https://www.kyalabs.io");
     // No PAYCLAW_API_KEY → uses OAuth token path (callWithOAuthToken)
     delete process.env.PAYCLAW_API_KEY;
   });
@@ -36,11 +36,11 @@ describe("getAgentIdentity — 401 handling", () => {
   });
 
   it("surfaces session_expired when OAuth token gets 401", async () => {
-    const authError = new api.PayClawApiError(
-      "PayClaw authentication failed. To continue, add a permanent API key to your MCP config:\n\n" +
-      "  1. Get a key: https://www.payclaw.io/dashboard/keys\n" +
+    const authError = new api.BadgeApiError(
+      "kyaLabs session has expired. To continue, add a permanent API key to your MCP config:\n\n" +
+      "  1. Get a key: https://www.kyalabs.io/dashboard/keys\n" +
       "  2. Add to your MCP config: PAYCLAW_API_KEY=pk_live_...\n\n" +
-      "Permanent keys don't expire. See: https://www.payclaw.io/docs/mcp-setup",
+      "Permanent keys don't expire. See: https://www.kyalabs.io/docs/mcp-setup",
       401
     );
 
@@ -50,14 +50,14 @@ describe("getAgentIdentity — 401 handling", () => {
 
     expect(result.session_expired).toBe(true);
     expect(result.status).not.toBe("active");
-    expect(result.message).toContain("PayClaw authentication failed");
-    expect(result.message).toContain("payclaw.io/dashboard/keys");
+    expect(result.message).toContain("kyaLabs session has expired");
+    expect(result.message).toContain("kyalabs.io/dashboard/keys");
     expect(result.principal_verified).toBe(false);
     expect(result.merchant).toBe("test-merchant");
   });
 
   it("still falls back to local identity for non-401 errors", async () => {
-    const networkError = new Error("Could not reach the PayClaw API.");
+    const networkError = new Error("Could not reach the kyaLabs API.");
     vi.mocked(api.getAgentIdentityWithToken).mockRejectedValue(networkError);
 
     const result = await getAgentIdentity("test-merchant");
@@ -73,11 +73,11 @@ describe("getAgentIdentity — 401 handling", () => {
     process.env.PAYCLAW_API_KEY = "pk_live_invalid_key";
     vi.mocked(storage.getStoredConsentKey).mockReturnValue("pk_live_invalid_key");
 
-    const authError = new api.PayClawApiError(
-      "PayClaw authentication failed. To continue, add a permanent API key to your MCP config:\n\n" +
-      "  1. Get a key: https://www.payclaw.io/dashboard/keys\n" +
+    const authError = new api.BadgeApiError(
+      "kyaLabs session has expired. To continue, add a permanent API key to your MCP config:\n\n" +
+      "  1. Get a key: https://www.kyalabs.io/dashboard/keys\n" +
       "  2. Add to your MCP config: PAYCLAW_API_KEY=pk_live_...\n\n" +
-      "Permanent keys don't expire. See: https://www.payclaw.io/docs/mcp-setup",
+      "Permanent keys don't expire. See: https://www.kyalabs.io/docs/mcp-setup",
       401
     );
     vi.mocked(api.getAgentIdentity).mockRejectedValue(authError);
@@ -86,23 +86,23 @@ describe("getAgentIdentity — 401 handling", () => {
 
     expect(result.session_expired).toBe(true);
     expect(result.status).toBe("session_expired");
-    expect(result.message).toContain("PayClaw authentication failed");
+    expect(result.message).toContain("kyaLabs session has expired");
     expect(result.principal_verified).toBe(false);
     expect(result.merchant).toBe("test-merchant");
   });
 
   it("formats session_expired result with directed action", async () => {
     const result = {
-      product_name: "PayClaw Badge",
+      product_name: "Badge by kyaLabs",
       status: "session_expired",
-      agent_disclosure: "PayClaw session expired",
+      agent_disclosure: "kyaLabs session expired",
       verification_token: "",
-      trust_url: "https://www.payclaw.io/trust",
-      contact: "agent_identity@payclaw.io",
+      trust_url: "https://www.kyalabs.io/trust",
+      contact: "agent_identity@kyalabs.io",
       principal_verified: false,
       spend_available: false,
       session_expired: true,
-      message: "PayClaw authentication failed. To continue, add a permanent API key.",
+      message: "kyaLabs session has expired. To continue, add a permanent API key.",
     };
 
     const formatted = formatIdentityResponse(result);

@@ -3,9 +3,9 @@ name: payclaw-io
 description: "Badge identity + virtual Visa cards for AI agents. Declare, pay, audit — on existing Visa rails. MCP-native."
 ---
 
-# PayClaw — Badge + Spend
+# kyaLabs — Badge + Spend
 
-Agents are not bots. PayClaw proves it — then lets them pay.
+Agents are not bots. kyaLabs proves it — then lets them pay.
 
 ## Setup
 
@@ -19,14 +19,14 @@ Add to your MCP client config:
       "args": ["-y", "@payclaw/mcp-server"],
       "env": {
         "PAYCLAW_API_KEY": "your_key_here",
-        "PAYCLAW_API_URL": "https://payclaw.io"
+        "PAYCLAW_API_URL": "https://www.kyalabs.io"
       }
     }
   }
 }
 ```
 
-Get your API key at [payclaw.io](https://payclaw.io).
+Get your API key at [kyalabs.io](https://www.kyalabs.io).
 
 ## Tools
 
@@ -48,6 +48,6 @@ If you only need identity (no payment), use [payclaw-badge](https://clawhub.com/
 
 ## Links
 
-- [payclaw.io](https://payclaw.io)
-- [Trust & Verification](https://payclaw.io/trust)
+- [kyalabs.io](https://www.kyalabs.io)
+- [Trust & Verification](https://www.kyalabs.io/trust)
 - [npm: @payclaw/mcp-server](https://www.npmjs.com/package/@payclaw/mcp-server)

@@ -3,8 +3,8 @@
 ## [0.8.2] - 2026-03-07 — Fix auth header stripped on redirect
 
 ### Fixed
-- **"Invalid request origin" on all MCP API calls** — `payclaw.io` redirects to `www.payclaw.io`, and Node.js `fetch()` strips the `Authorization` header on cross-origin redirects per the Fetch spec. The MCP server was sending `Bearer pc_v1_...` but it was silently dropped, causing every request to fall through to session auth (CSRF rejection).
-- Default base URL changed from `https://payclaw.io` to `https://www.payclaw.io` (canonical, no redirect).
+- **"Invalid request origin" on all MCP API calls** — `kyalabs.io` redirects to `www.kyalabs.io`, and Node.js `fetch()` strips the `Authorization` header on cross-origin redirects per the Fetch spec. The MCP server was sending `Bearer pc_v1_...` but it was silently dropped, causing every request to fall through to session auth (CSRF rejection).
+- Default base URL changed from `https://kyalabs.io` to `https://www.kyalabs.io` (canonical, no redirect).
 - API client now uses `redirect: "manual"` and re-sends requests with auth headers preserved on any redirect (defense-in-depth).
 - `getConfig()` now falls back to `getBaseUrl()` default when `PAYCLAW_API_URL` env var is not set, instead of throwing.
 
@@ -20,7 +20,7 @@
 ## [0.8.0] - 2026-03-07 — PRD-3: UCP-Aware Identity
 
 ### Added
-- `merchantUrl` parameter on `getAgentIdentity` — when provided, fetches merchant's `/.well-known/ucp` manifest and checks for `io.payclaw.common.identity` capability
+- `merchantUrl` parameter on `getAgentIdentity` — when provided, fetches merchant's `/.well-known/ucp` manifest and checks for `io.kyalabs.common.identity` capability
 - `checkoutPatch` in identity response — agent merges into checkout payload when merchant supports UCP
 - `ucpCapable`, `requiredByMerchant`, `ucpWarning` fields on identity result
 - `merchantUrl` parameter on `reportBadgePresented` (preferred over `merchant`)
