@@ -26,7 +26,7 @@ So did we. So we created kyaLabs - the first MCP tool suite that works with the 
 ## Quick Start
 
 ```bash
-npx -y @kyalabs/mcp-server
+npx @kyalabs/mcp-server
 ```
 
 OR add to your MCP client config (Claude Desktop, Cursor, or any MCP client):
@@ -36,7 +36,7 @@ OR add to your MCP client config (Claude Desktop, Cursor, or any MCP client):
   "mcpServers": {
     "kyalabs": {
       "command": "npx",
-      "args": ["-y", "@kyalabs/mcp-server"]
+      "args": ["@kyalabs/mcp-server"]
     }
   }
 }
@@ -208,7 +208,7 @@ Browsing requires declaration. Spending money requires declaration + stated inte
 If you only need identity (no payment), use the lighter package:
 
 ```bash
-npx -y @kyalabs/badge
+npx @kyalabs/badge
 ```
 
 ---
