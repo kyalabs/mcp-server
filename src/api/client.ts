@@ -170,6 +170,7 @@ export async function getBalance(): Promise<ApiBalanceResponse> {
 export async function getAgentIdentity(
   sessionId?: string,
   merchant?: string,
+  tripId?: string,
 ): Promise<ApiAgentIdentityResponse> {
   const { baseUrl, apiKey } = getConfig();
   return request<ApiAgentIdentityResponse>(`${baseUrl}/api/agent-identity`, {
@@ -178,6 +179,7 @@ export async function getAgentIdentity(
     body: JSON.stringify({
       session_id: sessionId,
       ...(merchant ? { merchant } : {}),
+      ...(tripId ? { trip_id: tripId } : {}),
     }),
   });
 }
@@ -202,7 +204,8 @@ export function getBaseUrl(): string {
 export async function getAgentIdentityWithToken(
   baseUrl: string,
   token: string,
-  merchant?: string
+  merchant?: string,
+  tripId?: string
 ): Promise<ApiAgentIdentityResponse> {
   return request<ApiAgentIdentityResponse>(`${baseUrl}/api/agent-identity`, {
     method: "POST",
@@ -212,6 +215,7 @@ export async function getAgentIdentityWithToken(
     },
     body: JSON.stringify({
       ...(merchant ? { merchant } : {}),
+      ...(tripId ? { trip_id: tripId } : {}),
     }),
   });
 }
