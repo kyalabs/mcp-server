@@ -14,6 +14,7 @@
 | `src/lib/parse-outcome.ts` | Outcome parsing |
 | `src/lib/report-badge-presented-handler.ts` | Badge presentation handler |
 | `src/lib/env.ts` | KYA_*/PAYCLAW_* env var resolution with backward compat |
+| `src/lib/signal-status.ts` | v2.3: SignalStatus + fetchSignalStatus (canonical in badge-server) |
 
 ### mcp-server owns (canonical copy lives here)
 
@@ -40,7 +41,12 @@ Shared files carry a header comment:
 
 ## Version
 
-Last sync: **2.0.0** (Badge Redux v2.0, Mar 16)
+Last sync: **2.3.0** (v2.2 assurance_level + v2.3 signal awareness, 2026-03-17)
+
+### v2.3.0 Changes
+- `sampling.ts`: Added `assuranceLevelStore`, `registerTripAssuranceLevel()`, `assuranceLevel` in `ActiveTrip`, `assurance_level` in both report payloads, `assuranceLevelStore.clear()` in `resetSamplingState`
+- `signal-status.ts` (NEW): Synced from badge-server canonical — `SignalStatus` + `fetchSignalStatus()`
+- `getAgentIdentity.ts`: **Not synced** — divergent. v2.2: `introspectBadgeToken` + `registerTripAssuranceLevel`. v2.3: `fetchSignalStatus` + `fireSignalContextReceived` + `extractDomain`
 
 ### v2.0.0 Changes
 - `storage.ts`: Added `getOrCreateInstallId()`, `_resetInstallIdCache()`

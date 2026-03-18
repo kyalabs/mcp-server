@@ -1,5 +1,29 @@
 # Changelog
 
+## [2.3.0] - 2026-03-17 — Merchant Signal Awareness
+
+### Added
+- `fetchSignalStatus(domain, apiUrl)` in `src/lib/signal-status.ts` — queries `/api/merchant/signal-status` (synced from badge-server canonical)
+- `merchant_signals` field in `IdentityResult` — returned from `getAgentIdentity`
+- `signal_context_received` event fired from `getAgentIdentity` when merchant has active signals
+- `extractDomain()` helper in `getAgentIdentity.ts`
+
+### Notes
+- Requires App PR: migration 044 + `/api/merchant/signal-status` endpoint
+
+## [2.2.0] - 2026-03-17 — assurance_level via Introspect
+
+### Added
+- `introspectBadgeToken(token)` in `src/api/client.ts` — POST `/api/oauth/introspect`, 3s timeout, graceful null on failure
+- `IntrospectResult` interface
+- `registerTripAssuranceLevel(token, level)` exported from `sampling.ts`
+- `assuranceLevelStore` in `sampling.ts` — FIFO-evicted at MAX_TRIPS cap
+- `assurance_level` in `IdentityResult` and `trip_success`/`trip_failure` payloads
+
+### Notes
+- `browse_declared` does NOT carry assurance_level — fires before token exists
+- Mock tokens (`pc_v1_sand*`) skip introspect
+
 ## [0.8.2] - 2026-03-07 — Fix auth header stripped on redirect
 
 ### Fixed
