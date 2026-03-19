@@ -18,7 +18,7 @@ import { initAgentModel } from "./lib/agent-model.js";
 
 const server = new McpServer({
   name: "kyalabs",
-  version: "2.1.0",
+  version: "2.3.0",
 });
 
 // Badge tool — re-exported from @kyalabs/badge logic (DQ-46: Spend includes Badge)
