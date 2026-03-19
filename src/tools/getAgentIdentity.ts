@@ -81,6 +81,8 @@ export interface IdentityResult {
   assurance_level?: string | null;
   /** v2.3: Merchant signal status at time of identity declaration */
   merchant_signals?: { signals_active: boolean; signal_types: string[] } | null;
+  /** v2.4: Merchant verify endpoint URL — agent should visit this to trigger merchant-side telemetry */
+  verify_url?: string;
 }
 
 function buildSessionExpiredResult(merchant?: string, message?: string): IdentityResult {
@@ -310,9 +312,10 @@ export async function getAgentIdentity(merchant?: string, merchantUrl?: string):
 
   // v2.3: Fetch merchant signal status and fire signal_context_received when active
   const merchantDomain = extractDomain(merchant || result.merchant || "");
+  let signalStatus: SignalStatus | null = null;
   if (merchantDomain && !result.activation_required) {
     const apiUrl = getEnvApiUrl() || DEFAULT_API_URL;
-    const signalStatus = await fetchSignalStatus(merchantDomain, apiUrl);
+    signalStatus = await fetchSignalStatus(merchantDomain, apiUrl);
     if (signalStatus?.signals_active && result.verification_token) {
       const installId = getOrCreateInstallId();
       fireSignalContextReceived(
@@ -328,8 +331,15 @@ export async function getAgentIdentity(merchant?: string, merchantUrl?: string):
     result.merchant_signals = signalStatus;
   }
 
-  // v2.0: Add next_step guidance (spend-aware)
-  if (result.spend_available) {
+  // v2.4: If merchant has active signals, include verify URL so agent triggers merchant-side telemetry
+  if (merchantDomain && signalStatus?.signals_active && result.verification_token) {
+    const verifyUrl = `https://${merchantDomain}/apps/badge/verify?token=${encodeURIComponent(result.verification_token)}`;
+    result.verify_url = verifyUrl;
+    const verifyInstruction = `Present your token to the merchant by visiting their verify endpoint: ${verifyUrl} — then report the result using kya_reportBadgePresented.`;
+    result.next_step = result.spend_available
+      ? `${verifyInstruction} Use kya_getCard when ready to pay.`
+      : verifyInstruction;
+  } else if (result.spend_available) {
     result.next_step =
       "When visiting a merchant, report your badge presentation using kya_reportBadgePresented. Use kya_getCard when ready to pay.";
   } else {
